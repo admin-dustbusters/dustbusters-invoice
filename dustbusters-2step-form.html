@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DustBusters - Weekly Invoice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e8eaf6;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #999;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .step.active {
+            color: #667eea;
+        }
+        
+        .step.active .step-number {
+            background: #667eea;
+            color: white;
+        }
+        
+        .step.complete .step-number {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .form-step {
+            display: none;
+        }
+        
+        .form-step.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        #manualNameInput {
+            display: none;
+            margin-top: 10px;
+        }
+        
+        .jobs-preview {
+            background: #f8f9fa;
+            border: 2px solid #e8eaf6;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .jobs-preview h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .job-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .job-date {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .job-hours {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .job-pay {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 15px;
+        }
+        
+        .jobs-total {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .jobs-total-label {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .jobs-total-amount {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: #e8f4fd;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        
+        .checkbox-group label {
+            margin: 0;
+            font-weight: 500;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #666;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .message {
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .no-jobs {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .summary-value {
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .loading-dropdown {
+            padding: 12px;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧹 DustBusters</h1>
+            <p>Weekly Invoice Submission</p>
+        </div>
+        
+        <div class="step-indicator">
+            <div class="step active" id="step1-indicator">
+                <div class="step-number">1</div>
+                <span>Review Jobs</span>
+            </div>
+            <div class="step" id="step2-indicator">
+                <div class="step-number">2</div>
+                <span>Submit Invoice</span>
+            </div>
+        </div>
+        
+        <!-- STEP 1: Review Jobs -->
+        <div class="form-step active" id="step1">
+            <div class="form-group">
+                <label for="cleanerName">Your Name *</label>
+                <select id="cleanerName" required>
+                    <option value="">Loading active cleaners...</option>
+                </select>
+                
+                <input type="text" id="manualNameInput" placeholder="Enter your full name" style="display: none;">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Your Email *</label>
+                <input type="email" id="email" required placeholder="your.email@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="weekEnding">Week Ending Date *</label>
+                <input type="date" id="weekEnding" required>
+            </div>
+            
+            <div class="button-group">
+                <button type="button" class="btn btn-primary" id="loadJobsBtn" onclick="loadJobs()">
+                    Load My Jobs →
+                </button>
+            </div>
+            
+            <div id="jobsSection" style="display: none;">
+                <div class="jobs-preview" id="jobsPreview"></div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="confirmJobs">
+                    <label for="confirmJobs">✓ I confirm these hours are correct</label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Notes or Corrections (Optional)</label>
+                    <textarea id="notes" rows="3" placeholder="Any notes about this week's work or corrections needed..."></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" id="nextBtn" onclick="goToStep2()" disabled>
+                        Next: Submit Invoice →
+                    </button>
+                </div>
+            </div>
+            
+            <div id="message1" class="message"></div>
+        </div>
+        
+        <!-- STEP 2: Submit Invoice -->
+        <div class="form-step" id="step2">
+            <h3 style="margin-bottom: 20px; color: #333;">Invoice Summary</h3>
+            
+            <div id="invoiceSummary"></div>
+            
+            <div class="form-group" style="margin-top: 30px;">
+                <label for="addressStep2">Street Address *</label>
+                <input type="text" id="addressStep2" required placeholder="123 Main Street">
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label for="cityStep2">City *</label>
+                    <input type="text" id="cityStep2" required placeholder="High Point">
+                </div>
+                
+                <div class="form-group">
+                    <label for="stateStep2">State *</label>
+                    <input type="text" id="stateStep2" required placeholder="NC" maxlength="2">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="zipStep2">ZIP Code *</label>
+                <input type="text" id="zipStep2" required placeholder="27265" pattern="[0-9]{5}">
+            </div>
+            
+            <div class="button-group">
+                <button type="button" class="btn btn-secondary" onclick="goToStep1()">
+                    ← Back
+                </button>
+                <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitInvoice()">
+                    Submit Invoice
+                </button>
+            </div>
+            
+            <div id="message2" class="message"></div>
+        </div>
+    </div>
+
+    <script>
+        const ACTIVE_CLEANERS_URL = 'http://dustbusters-n8n.duckdns.org:5678/webhook/active-cleaners';
+        const JOB_LOOKUP_URL = 'http://dustbusters-n8n.duckdns.org:5678/webhook/get-cleaner-jobs';
+        const INVOICE_SUBMIT_URL = 'http://dustbusters-n8n.duckdns.org:5678/webhook-test/cleaner-invoice';
+        
+        let jobData = null;
+        let isManualEntry = false;
+        
+        // Load active cleaners on page load
+        window.addEventListener('DOMContentLoaded', loadActiveCleaners);
+        
+        async function loadActiveCleaners() {
+            const dropdown = document.getElementById('cleanerName');
+            
+            try {
+                const response = await fetch(ACTIVE_CLEANERS_URL);
+                const data = await response.json();
+                
+                if (data.success && data.cleaners && data.cleaners.length > 0) {
+                    dropdown.innerHTML = '<option value="">Select your name...</option>';
+                    
+                    data.cleaners.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        dropdown.appendChild(option);
+                    });
+                    
+                    // Add "Other" option
+                    const otherOption = document.createElement('option');
+                    otherOption.value = '__OTHER__';
+                    otherOption.textContent = '🆕 My name is not in the list';
+                    dropdown.appendChild(otherOption);
+                    
+                } else {
+                    // Fallback if API fails
+                    loadFallbackCleaners();
+                }
+            } catch (error) {
+                console.error('Error loading cleaners:', error);
+                loadFallbackCleaners();
+            }
+        }
+        
+        function loadFallbackCleaners() {
+            const dropdown = document.getElementById('cleanerName');
+            const fallbackNames = [
+                'Aerial Reed', 'Shelly Lim', 'Christina Graham', 'Rayonta Rose',
+                'Brandy Charles', 'Johna Burch', 'Stephanie M', 'April Caso', 'Nashiya Morton'
+            ];
+            
+            dropdown.innerHTML = '<option value="">Select your name...</option>';
+            fallbackNames.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                dropdown.appendChild(option);
+            });
+            
+            const otherOption = document.createElement('option');
+            otherOption.value = '__OTHER__';
+            otherOption.textContent = '🆕 My name is not in the list';
+            dropdown.appendChild(otherOption);
+        }
+        
+        // Handle "Other" selection
+        document.getElementById('cleanerName').addEventListener('change', function() {
+            const manualInput = document.getElementById('manualNameInput');
+            
+            if (this.value === '__OTHER__') {
+                manualInput.style.display = 'block';
+                manualInput.required = true;
+                isManualEntry = true;
+            } else {
+                manualInput.style.display = 'none';
+                manualInput.required = false;
+                isManualEntry = false;
+            }
+        });
+        
+        // Enable confirm checkbox to enable next button
+        document.getElementById('confirmJobs').addEventListener('change', function() {
+            document.getElementById('nextBtn').disabled = !this.checked;
+        });
+        
+        function getCleanerName() {
+            if (isManualEntry) {
+                return document.getElementById('manualNameInput').value.trim();
+            }
+            return document.getElementById('cleanerName').value;
+        }
+        
+        async function loadJobs() {
+            const name = getCleanerName();
+            const email = document.getElementById('email').value;
+            const weekEnding = document.getElementById('weekEnding').value;
+            
+            if (!name || !email || !weekEnding) {
+                showMessage('message1', 'Please fill in all fields', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('loadJobsBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span>Loading jobs...';
+            
+            try {
+                const response = await fetch(JOB_LOOKUP_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        cleanerName: name,
+                        email: email,
+                        weekEnding: weekEnding
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success || !data.isVerified) {
+                    showMessage('message1', data.error || 'Unable to verify your information', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Load My Jobs →';
+                    return;
+                }
+                
+                jobData = data;
+                displayJobs(data);
+                document.getElementById('jobsSection').style.display = 'block';
+                btn.style.display = 'none';
+                
+                if (data.isFirstTime) {
+                    showMessage('message1', 'First time submitting! Your information will be saved for next time.', 'info');
+                }
+                
+            } catch (error) {
+                showMessage('message1', 'Error loading jobs. Please try again.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Load My Jobs →';
+            }
+        }
+        
+        function displayJobs(data) {
+            const container = document.getElementById('jobsPreview');
+            
+            if (data.jobs.length === 0) {
+                container.innerHTML = '<div class="no-jobs">No jobs found for this week.<br>Please contact your manager if this seems incorrect.</div>';
+                return;
+            }
+            
+            let html = `<h3>📅 Week of ${data.weekStart} to ${data.weekEnd}</h3>`;
+            html += '<div style="margin-top: 15px;">';
+            
+            data.jobs.forEach(job => {
+                html += `
+                    <div class="job-item">
+                        <div>
+                            <div class="job-date">${job.date}</div>
+                            <div class="job-hours">${job.hoursWorked} hours @ $${job.hourlyRate}/hr</div>
+                        </div>
+                        <div class="job-pay">$${parseFloat(job.totalPay).toFixed(2)}</div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                <div class="jobs-total">
+                    <div>
+                        <div class="jobs-total-label">${data.jobCount} Jobs</div>
+                        <div style="font-size: 14px; opacity: 0.9;">${data.totalHours} total hours</div>
+                    </div>
+                    <div class="jobs-total-amount">$${data.totalPay}</div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        function goToStep2() {
+            const name = getCleanerName();
+            
+            // Build summary
+            const summary = `
+                <div class="summary-row">
+                    <span class="summary-label">Cleaner:</span>
+                    <span class="summary-value">${name}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Week Ending:</span>
+                    <span class="summary-value">${jobData.weekEnd}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Total Hours:</span>
+                    <span class="summary-value">${jobData.totalHours} hours</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Total Amount:</span>
+                    <span class="summary-value" style="font-size: 18px; color: #667eea;">$${jobData.totalPay}</span>
+                </div>
+            `;
+            document.getElementById('invoiceSummary').innerHTML = summary;
+            
+            // Pre-fill address if available
+            if (jobData.savedAddress) {
+                document.getElementById('addressStep2').value = jobData.savedAddress;
+                document.getElementById('cityStep2').value = jobData.savedCity;
+                document.getElementById('stateStep2').value = jobData.savedState;
+                document.getElementById('zipStep2').value = jobData.savedZIP;
+            }
+            
+            // Switch steps
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step2').classList.add('active');
+            document.getElementById('step1-indicator').classList.remove('active');
+            document.getElementById('step1-indicator').classList.add('complete');
+            document.getElementById('step2-indicator').classList.add('active');
+        }
+        
+        function goToStep1() {
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step1').classList.add('active');
+            document.getElementById('step2-indicator').classList.remove('active');
+            document.getElementById('step1-indicator').classList.remove('complete');
+            document.getElementById('step1-indicator').classList.add('active');
+        }
+        
+        async function submitInvoice() {
+            const address = document.getElementById('addressStep2').value;
+            const city = document.getElementById('cityStep2').value;
+            const state = document.getElementById('stateStep2').value.toUpperCase();
+            const zip = document.getElementById('zipStep2').value;
+            
+            if (!address || !city || !state || !zip) {
+                showMessage('message2', 'Please fill in all address fields', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span>Submitting...';
+            
+            const name = getCleanerName();
+            
+            const invoiceData = {
+                cleanerName: name,
+                email: jobData.email,
+                address: address,
+                city: city,
+                state: state,
+                zipCode: zip,
+                fullAddress: `${address}, ${city}, ${state} ${zip}`,
+                weekEnding: jobData.weekEnd,
+                totalHours: parseFloat(jobData.totalHours),
+                hourlyRate: jobData.hourlyRate,
+                totalAmount: jobData.totalPay,
+                notes: document.getElementById('notes').value,
+                submittedAt: new Date().toISOString()
+            };
+            
+            try {
+                const response = await fetch(INVOICE_SUBMIT_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(invoiceData)
+                });
+                
+                if (response.ok) {
+                    showMessage('message2', '✅ Invoice submitted successfully! Check your email for confirmation.', 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 3000);
+                } else {
+                    throw new Error('Submission failed');
+                }
+                
+            } catch (error) {
+                showMessage('message2', 'Error submitting invoice. Please try again.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Submit Invoice';
+            }
+        }
+        
+        function showMessage(id, text, type) {
+            const msg = document.getElementById(id);
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+            msg.style.display = 'block';
+        }
+        
+        // Auto-uppercase state
+        document.getElementById('stateStep2').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    </script>
+</body>
+</html>
