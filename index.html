@@ -323,13 +323,6 @@
             font-weight: 600;
             font-size: 14px;
         }
-        
-        .loading-dropdown {
-            padding: 12px;
-            text-align: center;
-            color: #666;
-            font-style: italic;
-        }
     </style>
 </head>
 <body>
@@ -442,14 +435,14 @@
     </div>
 
     <script>
-        const ACTIVE_CLEANERS_URL = 'https://dustbusters-n8n.duckdns.org:5678/webhook/active-cleaners';
-        const JOB_LOOKUP_URL = 'https://dustbusters-n8n.duckdns.org:5678/webhook/get-cleaner-jobs';
-        const INVOICE_SUBMIT_URL = 'https://dustbusters-n8n.duckdns.org:5678/webhook/cleaner-invoice';
+        // CORRECTED URLs - No :5678 port!
+        const ACTIVE_CLEANERS_URL = 'https://dustbusters-n8n.duckdns.org/webhook/active-cleaners';
+        const JOB_LOOKUP_URL = 'https://dustbusters-n8n.duckdns.org/webhook/get-cleaner-jobs';
+        const INVOICE_SUBMIT_URL = 'https://dustbusters-n8n.duckdns.org/webhook/cleaner-invoice';
         
         let jobData = null;
         let isManualEntry = false;
         
-        // Load active cleaners on page load
         window.addEventListener('DOMContentLoaded', loadActiveCleaners);
         
         async function loadActiveCleaners() {
@@ -469,14 +462,12 @@
                         dropdown.appendChild(option);
                     });
                     
-                    // Add "Other" option
                     const otherOption = document.createElement('option');
                     otherOption.value = '__OTHER__';
                     otherOption.textContent = '🆕 My name is not in the list';
                     dropdown.appendChild(otherOption);
                     
                 } else {
-                    // Fallback if API fails
                     loadFallbackCleaners();
                 }
             } catch (error) {
@@ -506,7 +497,6 @@
             dropdown.appendChild(otherOption);
         }
         
-        // Handle "Other" selection
         document.getElementById('cleanerName').addEventListener('change', function() {
             const manualInput = document.getElementById('manualNameInput');
             
@@ -521,7 +511,6 @@
             }
         });
         
-        // Enable confirm checkbox to enable next button
         document.getElementById('confirmJobs').addEventListener('change', function() {
             document.getElementById('nextBtn').disabled = !this.checked;
         });
@@ -622,7 +611,6 @@
         function goToStep2() {
             const name = getCleanerName();
             
-            // Build summary
             const summary = `
                 <div class="summary-row">
                     <span class="summary-label">Cleaner:</span>
@@ -643,7 +631,6 @@
             `;
             document.getElementById('invoiceSummary').innerHTML = summary;
             
-            // Pre-fill address if available
             if (jobData.savedAddress) {
                 document.getElementById('addressStep2').value = jobData.savedAddress;
                 document.getElementById('cityStep2').value = jobData.savedCity;
@@ -651,7 +638,6 @@
                 document.getElementById('zipStep2').value = jobData.savedZIP;
             }
             
-            // Switch steps
             document.getElementById('step1').classList.remove('active');
             document.getElementById('step2').classList.add('active');
             document.getElementById('step1-indicator').classList.remove('active');
@@ -730,7 +716,6 @@
             msg.style.display = 'block';
         }
         
-        // Auto-uppercase state
         document.getElementById('stateStep2').addEventListener('input', function(e) {
             e.target.value = e.target.value.toUpperCase();
         });
