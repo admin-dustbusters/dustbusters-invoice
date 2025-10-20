@@ -861,4 +861,73 @@
                 
                 if (response.ok) {
                     showMessage('message2', '✅ Invoice submitted successfully! Check your email for confirmation.', 'success');
-                    btn.textContent =
+                    btn.textContent = 'Success!';
+                    setTimeout(() => {
+                        location.reload();
+                    }, 3000);
+                } else {
+                    throw new Error('Submission failed');
+                }
+                
+            } catch (error) {
+                showMessage('message2', 'Error submitting invoice. Please try again.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Submit Invoice';
+            }
+        }
+        
+        async function submitCorrectionAlert() {
+             const discrepancyNotes = document.getElementById('discrepancyNotes').value;
+             if (!discrepancyNotes.trim()) {
+                showMessage('message1', 'Please explain what is wrong before submitting an alert.', 'error');
+                return;
+             }
+
+             const btn = document.querySelector('#actionButtons .btn-danger');
+             btn.disabled = true;
+             btn.innerHTML = '<span class="loading"></span>Sending Alert...';
+
+             const alertData = {
+                cleanerName: getCleanerName(),
+                email: document.getElementById('email').value,
+                weekEnding: document.getElementById('weekEnding').value,
+                discrepancyNotes: discrepancyNotes,
+                reportedAt: new Date().toISOString()
+             };
+
+             try {
+                const response = await fetch(CORRECTION_ALERT_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(alertData)
+                });
+                
+                if (response.ok) {
+                    showMessage('message1', '✅ Alert sent successfully! Your manager has been notified. They will contact you after they have fixed the issue.', 'success');
+                    btn.textContent = 'Alert Sent!';
+                    setTimeout(() => {
+                        location.reload();
+                    }, 4000);
+                } else {
+                    throw new Error('Alert submission failed');
+                }
+             } catch(error) {
+                showMessage('message1', 'Error sending alert. Please try again or contact your manager directly.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Submit Correction Alert';
+             }
+        }
+
+        function showMessage(id, text, type) {
+            const msg = document.getElementById(id);
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+            msg.style.display = 'block';
+        }
+        
+        document.getElementById('stateStep2').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    </script>
+</body>
+</html>
