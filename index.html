@@ -194,7 +194,6 @@
             font-weight: bold;
         }
         
-        /* New Styles for Correction Logic */
         .correction-options {
             margin: 25px 0;
             padding: 20px;
@@ -228,10 +227,6 @@
 
         .correction-options label:hover {
             border-color: #c0c8f5;
-        }
-        
-        .correction-options input[type="radio"]:checked + span + .radio-icon {
-            opacity: 1;
         }
 
         .correction-options label.selected-correct {
@@ -372,6 +367,16 @@
             font-weight: 600;
             font-size: 14px;
         }
+
+        .info-box {
+            background: #e3f2fd;
+            border: 2px solid #90caf9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #1565c0;
+        }
     </style>
 </head>
 <body>
@@ -417,6 +422,34 @@
                 <button type="button" class="btn btn-primary" id="loadJobsBtn" onclick="loadJobs()">
                     Load My Jobs →
                 </button>
+            </div>
+            
+            <!-- Manual Entry Section -->
+            <div id="manualEntrySection" style="display: none;">
+                <div class="info-box">
+                    ℹ️ You're creating a manual invoice. Please enter the details below.
+                </div>
+                
+                <div class="form-group">
+                    <label for="manualHours">Total Hours Worked *</label>
+                    <input type="number" id="manualHours" step="0.01" min="0" placeholder="e.g., 40.5">
+                </div>
+                
+                <div class="form-group">
+                    <label for="manualRate">Hourly Rate ($) *</label>
+                    <input type="number" id="manualRate" step="0.01" min="0" placeholder="e.g., 18.00">
+                </div>
+                
+                <div class="form-group">
+                    <label for="manualNotes">Notes (optional)</label>
+                    <textarea id="manualNotes" rows="3" placeholder="Any additional notes about this invoice..."></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" onclick="goToStep2Manual()">
+                        Next: Enter Address →
+                    </button>
+                </div>
             </div>
             
             <div id="jobsSection" style="display: none;">
@@ -520,7 +553,7 @@
                     
                     const otherOption = document.createElement('option');
                     otherOption.value = '__OTHER__';
-                    otherOption.textContent = '🆕 My name is not in the list';
+                    otherOption.textContent = '🆕 My name is not in the list (Manual Entry)';
                     dropdown.appendChild(otherOption);
                     
                 } else {
@@ -549,20 +582,25 @@
             
             const otherOption = document.createElement('option');
             otherOption.value = '__OTHER__';
-            otherOption.textContent = '🆕 My name is not in the list';
+            otherOption.textContent = '🆕 My name is not in the list (Manual Entry)';
             dropdown.appendChild(otherOption);
         }
         
         document.getElementById('cleanerName').addEventListener('change', function() {
             const manualInput = document.getElementById('manualNameInput');
+            const loadBtn = document.getElementById('loadJobsBtn');
+            const manualSection = document.getElementById('manualEntrySection');
             
             if (this.value === '__OTHER__') {
                 manualInput.style.display = 'block';
                 manualInput.required = true;
+                loadBtn.textContent = 'Continue to Manual Entry →';
                 isManualEntry = true;
             } else {
                 manualInput.style.display = 'none';
                 manualInput.required = false;
+                manualSection.style.display = 'none';
+                loadBtn.textContent = 'Load My Jobs →';
                 isManualEntry = false;
             }
         });
@@ -603,6 +641,12 @@
                 return;
             }
             
+            if (isManualEntry) {
+                document.getElementById('loadJobsBtn').style.display = 'none';
+                document.getElementById('manualEntrySection').style.display = 'block';
+                return;
+            }
+            
             const btn = document.getElementById('loadJobsBtn');
             btn.disabled = true;
             btn.innerHTML = '<span class="loading"></span>Loading jobs...';
@@ -631,13 +675,63 @@
                 displayJobs(data);
                 document.getElementById('jobsSection').style.display = 'block';
                 btn.style.display = 'none';
-                showMessage('message1', '', 'info'); // Clear previous messages
+                showMessage('message1', '', 'info');
                 
             } catch (error) {
                 showMessage('message1', 'Error loading jobs. Please check your connection and try again.', 'error');
                 btn.disabled = false;
                 btn.innerHTML = 'Load My Jobs →';
             }
+        }
+        
+        function goToStep2Manual() {
+            const hours = parseFloat(document.getElementById('manualHours').value);
+            const rate = parseFloat(document.getElementById('manualRate').value);
+            const notes = document.getElementById('manualNotes').value;
+            
+            if (!hours || !rate) {
+                showMessage('message1', 'Please enter hours and hourly rate.', 'error');
+                return;
+            }
+            
+            const totalAmount = (hours * rate).toFixed(2);
+            
+            jobData = {
+                email: document.getElementById('email').value,
+                weekEnd: document.getElementById('weekEnding').value,
+                totalHours: hours.toFixed(2),
+                hourlyRate: rate.toFixed(2),
+                totalPay: totalAmount,
+                notes: notes
+            };
+            
+            const name = getCleanerName();
+            
+            const summary = `
+                <div class="summary-row">
+                    <span class="summary-label">Cleaner:</span>
+                    <span class="summary-value">${name}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Week Ending:</span>
+                    <span class="summary-value">${jobData.weekEnd}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Total Hours:</span>
+                    <span class="summary-value">${jobData.totalHours} hours</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Total Amount:</span>
+                    <span class="summary-value" style="font-size: 18px; color: #667eea;">$${jobData.totalPay}</span>
+                </div>
+            `;
+            document.getElementById('invoiceSummary').innerHTML = summary;
+            
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step2').classList.add('active');
+            document.getElementById('step1-indicator').classList.remove('active');
+            document.getElementById('step1-indicator').classList.add('complete');
+            document.getElementById('step2-indicator').classList.add('active');
         }
         
         function displayJobs(data) {
@@ -752,9 +846,9 @@
                 fullAddress: `${address}, ${city}, ${state} ${zip}`,
                 weekEnding: jobData.weekEnd,
                 totalHours: parseFloat(jobData.totalHours),
-                hourlyRate: jobData.hourlyRate,
-                totalAmount: jobData.totalPay,
-                notes: "", // Notes are handled by the correction alert now
+                hourlyRate: parseFloat(jobData.hourlyRate),
+                totalAmount: parseFloat(jobData.totalPay),
+                notes: jobData.notes || "",
                 submittedAt: new Date().toISOString()
             };
             
@@ -767,73 +861,4 @@
                 
                 if (response.ok) {
                     showMessage('message2', '✅ Invoice submitted successfully! Check your email for confirmation.', 'success');
-                     btn.textContent = 'Success!';
-                    setTimeout(() => {
-                        location.reload();
-                    }, 3000);
-                } else {
-                    throw new Error('Submission failed');
-                }
-                
-            } catch (error) {
-                showMessage('message2', 'Error submitting invoice. Please try again.', 'error');
-                btn.disabled = false;
-                btn.textContent = 'Submit Invoice';
-            }
-        }
-        
-        async function submitCorrectionAlert() {
-             const discrepancyNotes = document.getElementById('discrepancyNotes').value;
-             if (!discrepancyNotes.trim()) {
-                showMessage('message1', 'Please explain what is wrong before submitting an alert.', 'error');
-                return;
-             }
-
-             const btn = document.querySelector('#actionButtons .btn-danger');
-             btn.disabled = true;
-             btn.innerHTML = '<span class="loading"></span>Sending Alert...';
-
-             const alertData = {
-                cleanerName: getCleanerName(),
-                email: document.getElementById('email').value,
-                weekEnding: document.getElementById('weekEnding').value,
-                discrepancyNotes: discrepancyNotes,
-                reportedAt: new Date().toISOString()
-             };
-
-             try {
-                const response = await fetch(CORRECTION_ALERT_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(alertData)
-                });
-                
-                if (response.ok) {
-                    showMessage('message1', '✅ Alert sent successfully! Your manager has been notified. They will contact you after they have fixed the issue.', 'success');
-                    btn.textContent = 'Alert Sent!';
-                    setTimeout(() => {
-                        location.reload();
-                    }, 4000);
-                } else {
-                    throw new Error('Alert submission failed');
-                }
-             } catch(error) {
-                showMessage('message1', 'Error sending alert. Please try again or contact your manager directly.', 'error');
-                btn.disabled = false;
-                btn.textContent = 'Submit Correction Alert';
-             }
-        }
-
-        function showMessage(id, text, type) {
-            const msg = document.getElementById(id);
-            msg.textContent = text;
-            msg.className = `message ${type}`;
-            msg.style.display = 'block';
-        }
-        
-        document.getElementById('stateStep2').addEventListener('input', function(e) {
-            e.target.value = e.target.value.toUpperCase();
-        });
-    </script>
-</body>
-</html>
+                    btn.textContent =
