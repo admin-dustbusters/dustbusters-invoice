@@ -853,6 +853,7 @@
                 totalHours: parseFloat(jobData.totalHours),
                 hourlyRate: parseFloat(jobData.hourlyRate),
                 totalAmount: parseFloat(jobData.totalPay),
+                totalTips: parseFloat(jobData.totalTips || 0),
                 notes: jobData.notes || "",
                 submittedAt: new Date().toISOString()
             };
