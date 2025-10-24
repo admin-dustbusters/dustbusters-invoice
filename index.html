@@ -746,13 +746,18 @@
             html += '<div style="margin-top: 15px;">';
             
             data.jobs.forEach(job => {
+                const tipAmount = parseFloat(job.tipAmount || 0);
+                const basePay = parseFloat(job.totalPay);
+                const totalWithTip = basePay + tipAmount;
+                
                 html += `
                     <div class="job-item">
                         <div>
                             <div class="job-date">${job.date}</div>
-                            <div class="job-hours">${job.hoursWorked} hours @ $${job.hourlyRate}/hr</div>
+                            <div class="job-hours">${job.hoursWorked} hours @ $${job.hourlyRate}/hr = $${basePay.toFixed(2)}</div>
+                            ${tipAmount > 0 ? `<div class="job-hours" style="color: #4caf50;">+ $${tipAmount.toFixed(2)} tip/gas money</div>` : ''}
                         </div>
-                        <div class="job-pay">$${parseFloat(job.totalPay).toFixed(2)}</div>
+                        <div class="job-pay">$${totalWithTip.toFixed(2)}</div>
                     </div>
                 `;
             });
